@@ -84,7 +84,9 @@ describe Heimdallr::Proxy do
   end
 
   it "should handle entities creation" do
-    expect { Article.restrict(@looser).create! :content => 'test', :secrecy_level => 10 }.should raise_error
+    expect {
+      Article.restrict(@looser).create! :content => 'test', :secrecy_level => 10
+    }.to raise_error
 
     article = Article.restrict(@john).create! :content => 'test', :secrecy_level => 3
     article.owner_id.should == @john.id
@@ -105,27 +107,27 @@ describe Heimdallr::Proxy do
 
   it "should handle implicit strategy" do
     article = Article.create! :owner_id => @john.id, :content => 'test', :secrecy_level => 4
-    expect { article.restrict(@looser).secrecy_level }.should raise_error
-    article.restrict(@looser).implicit.secrecy_level.should == nil
+    expect { article.restrict(@looser).secrecy_level }.to raise_error
+    article.restrict(@looser).implicit.secrecy_level.should be_nil
   end
 
   it "should answer if object is creatable" do
-    Article.restrict(@john).creatable?.should == true
-    Article.restrict(@admin).creatable?.should == true
-    Article.restrict(@looser).creatable?.should == true
+    Article.restrict(@john).should be_creatable
+    Article.restrict(@admin).should be_creatable
+    Article.restrict(@looser).should be_creatable
   end
 
   it "should answer if object is modifiable" do
     article = Article.create! :owner_id => @john.id, :content => 'test', :secrecy_level => 4
-    article.restrict(@john).modifiable?.should == true
-    article.restrict(@admin).modifiable?.should == true
-    article.restrict(@looser).modifiable?.should == false
+    article.restrict(@john).should be_modifiable
+    article.restrict(@admin).should be_modifiable
+    article.restrict(@looser).should_not be_modifiable
   end
 
   it "should answer if object is destroyable" do
     article = Article.create! :owner_id => @john.id, :content => 'test', :secrecy_level => 4
-    article.restrict(@john).destroyable?.should == true
-    article.restrict(@admin).destroyable?.should == true
-    article.restrict(@looser).destroyable?.should == false
+    article.restrict(@john).should be_destroyable
+    article.restrict(@admin).should be_destroyable
+    article.restrict(@looser).should_not be_destroyable
   end
 end

@@ -20,6 +20,17 @@ module Heimdallr
 
       @restrictions = @record.class.restrictions(context, record)
       @eager_loaded = @options.delete(:eager_loaded) || {}
+
+      [:delete, :destroy].each do |method|
+        define_singleton_method method do |*args|
+          scope = @restrictions.request_scope(:delete)
+          if scope.where({ @record.class.primary_key => @record.to_key }).any?
+            @record.send method
+          else
+            raise Heimdallr::PermissionError, "Deletion is forbidden"
+          end
+        end
+      end
     end
 
     # @method decrement(field, by=1)
@@ -112,19 +123,6 @@ module Heimdallr
       check_attributes do
         @record.save!(options)
       end
-    end
-
-    [:delete, :destroy].each do |method|
-      class_eval(<<-EOM, __FILE__, __LINE__)
-      def #{method}
-        scope = @restrictions.request_scope(:delete)
-        if scope.where({ @record.class.primary_key => @record.to_key }).any?
-          @record.#{method}
-        else
-          raise PermissionError, "Deletion is forbidden"
-        end
-      end
-      EOM
     end
 
     # @method valid?

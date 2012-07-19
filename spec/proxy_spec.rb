@@ -68,18 +68,18 @@ describe Heimdallr::Proxy do
 
   it "should handle destroy scope" do
     article = Article.create! :owner_id => @john.id, :content => 'test', :secrecy_level => 0
-    expect { article.restrict(@looser).destroy }.should raise_error
-    expect { article.restrict(@john).destroy }.should_not raise_error
+    expect { article.restrict(@looser).destroy }.to raise_error Heimdallr::PermissionError
+    expect { article.restrict(@john).destroy }.to_not raise_error
 
     article = Article.create! :owner_id => @john.id, :content => 'test', :secrecy_level => 0
-    expect { article.restrict(@admin).destroy }.should_not raise_error
+    expect { article.restrict(@admin).destroy }.to_not raise_error
   end
 
   it "should handle list of fields to view" do
     article = Article.create! :owner_id => @john.id, :content => 'test', :secrecy_level => 0
-    expect { article.restrict(@looser).secrecy_level }.should raise_error
-    expect { article.restrict(@admin).secrecy_level }.should_not raise_error
-    expect { article.restrict(@john).secrecy_level }.should_not raise_error
+    expect { article.restrict(@looser).secrecy_level }.to raise_error
+    expect { article.restrict(@admin).secrecy_level }.to_not raise_error
+    expect { article.restrict(@john).secrecy_level }.to_not raise_error
     article.restrict(@looser).content.should == 'test'
   end
 
@@ -94,13 +94,13 @@ describe Heimdallr::Proxy do
     article = Article.create! :owner_id => @john.id, :content => 'test', :secrecy_level => 10
     expect {
       article.restrict(@john).update_attributes! :secrecy_level => 8
-    }.should raise_error
+    }.to raise_error
     expect {
       article.restrict(@looser).update_attributes! :secrecy_level => 3
-    }.should raise_error
+    }.to raise_error
     expect {
       article.restrict(@admin).update_attributes! :secrecy_level => 10
-    }.should_not raise_error
+    }.to_not raise_error
   end
 
   it "should handle implicit strategy" do

@@ -72,6 +72,16 @@ module Heimdallr
         self.heimdallr_relations ||= []
         self.heimdallr_relations  += methods.map(&:to_sym)
       end
+
+      # Return the list of attribute names depending from the type of class
+      # Heimdallr was mixed into
+      def heimdallr_attribute_names
+        if defined?(Mongoid) and self.ancestors.include?(Mongoid::Document)
+          self.fields.keys
+        else   
+          self.attribute_names      
+        end
+      end
     end
 
     # Return a secure proxy object for this record.
